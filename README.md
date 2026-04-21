@@ -1,66 +1,73 @@
-# Intake Form PWA 🚀
+# React + TypeScript + Vite
 
-A premium, offline-capable intake form built with Vue 3 and Vite. This application utilizes Progressive Web App (PWA) technology to ensure it remains functional even without an internet connection.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## ✨ Features
+Currently, two official plugins are available:
 
-- **PWA Ready**: Installable on mobile and desktop devices.
-- **Offline Mode**: Access the form and view previously submitted data without internet.
-- **Persistent Storage**: Uses `localStorage` to keep your data safe across page refreshes.
-- **Modern UI**: Clean, premium design with glassmorphism effects and Inter typography.
-- **Form Validation**: Real-time validation for required fields (Name, Email, Phone).
-- **Status Indicator**: Live badge showing your current connection status (Online/Offline).
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## 🛠️ Tech Stack
+## React Compiler
 
-- **Framework**: [Vue 3](https://vuejs.org/) (Composition API)
-- **Bundler**: [Vite](https://vitejs.dev/)
-- **PWA Support**: [vite-plugin-pwa](https://vite-pwa-org.netlify.app/)
-- **Icons**: [Lucide Vue Next](https://lucide.dev/)
-- **Styling**: Vanilla CSS with modern CSS variables
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## 🚀 Getting Started
+## Expanding the ESLint configuration
 
-### Installation
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-```bash
-# Install dependencies
-npm install
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
+
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
 
-### Development
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-```bash
-# Run the dev server
-npm run dev
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
-> **Note**: For testing offline features in dev mode, refresh the page while online once to register the service worker.
-
-### Production Build (Testing PWA)
-
-To experience the full PWA capabilities (like the install button and reliable offline support), you should build the project:
-
-```bash
-# Build the project
-npm run build
-
-# Preview the build locally
-npm run preview
-```
-
-## 🌐 Deployment
-
-This project is optimized for deployment on platforms like **Vercel** or **Netlify**. 
-
-1. Push your code to a GitHub repository.
-2. Connect the repository to Vercel.
-3. Vercel will automatically detect the Vite build settings and deploy your PWA.
-
-## 📝 How the Offline Support Works
-
-1. **Caching**: `vite-plugin-pwa` generates a Service Worker that caches all essential app files (HTML, JS, CSS, Icons).
-2. **Data**: Form submissions are stored in `localStorage`.
-3. **Behavior**: When a user reloads the app offline, the Service Worker serves the cached files, and the Vue app retrieves the last submission from `localStorage` to display it on the same page.
-
----
-Built with ❤️ using Vue 3 + Vite.
