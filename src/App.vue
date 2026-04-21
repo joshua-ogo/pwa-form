@@ -9,12 +9,15 @@ import {
   CheckCircle2, 
   Wifi, 
   WifiOff, 
-  Send 
+  Send,
+  Download
 } from 'lucide-vue-next'
 
 // --- State ---
 const isOnline = ref(navigator.onLine)
 const isSubmitted = ref(false)
+const deferredPrompt = ref(null)
+const isInstalled = ref(false)
 const errors = reactive({})
 
 const form = reactive({
@@ -56,13 +59,35 @@ const handleSubmit = () => {
   }
 }
 
-const resetForm = () => {
-  isSubmitted.value = false
+const installApp = async () => {
+  if (!deferredPrompt.value) return
+  
+  deferredPrompt.value.prompt()
+  const { outcome } = await deferredPrompt.value.userChoice
+  if (outcome === 'accepted') {
+    deferredPrompt.value = null
+  }
 }
 
 onMounted(() => {
   window.addEventListener('online', () => isOnline.value = true)
   window.addEventListener('offline', () => isOnline.value = false)
+  
+  // PWA Install Prompt logic
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault()
+    deferredPrompt.value = e
+  })
+
+  window.addEventListener('appinstalled', () => {
+    deferredPrompt.value = null
+    isInstalled.value = true
+  })
+
+  // Check if already installed
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    isInstalled.value = true
+  }
   
   // Load existing data
   const local = localStorage.getItem('intake_form_data')
@@ -87,8 +112,13 @@ onUnmounted(() => {
       {{ isOnline ? 'Online' : 'Offline' }}
     </div>
 
-    <!-- Header -->
     <div class="glass-card header-card">
+      <div v-if="deferredPrompt && !isInstalled" style="margin-bottom: 1.5rem;">
+        <button @click="installApp" class="install-btn">
+          <Download size="18" style="margin-right: 8px; vertical-align: middle;"/>
+          Install App for Offline Use
+        </button>
+      </div>
       <h1>Intake Form</h1>
       <p class="subtitle">Please fill out your information below. Your data is saved locally and remains accessible offline.</p>
     </div>

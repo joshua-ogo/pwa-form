@@ -18,6 +18,9 @@ export default defineConfig({
         short_name: 'IntakeApp',
         description: 'A simple offline-capable intake form',
         theme_color: '#00dc82',
+        background_color: '#f8fafc',
+        display: 'standalone',
+        start_url: '/',
         icons: [
           {
             src: 'pwa-192x192.png',
