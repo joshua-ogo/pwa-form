@@ -19,7 +19,7 @@ export default defineConfig({
               cacheName: 'google-fonts-cache',
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
+                maxAgeSeconds: 60 * 60 * 24 * 365
               },
               cacheableResponse: {
                 statuses: [0, 200]
@@ -29,9 +29,9 @@ export default defineConfig({
         ]
       },
       manifest: {
-        name: 'Midnight Intake',
-        short_name: 'Intake',
-        description: 'Premium Offline Intake Form',
+        name: 'PWA Intake Form',
+        short_name: 'PWA',
+        description: 'Offline Intake Form',
         theme_color: '#020617',
         background_color: '#020617',
         display: 'standalone',

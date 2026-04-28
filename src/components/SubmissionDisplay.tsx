@@ -1,65 +1,108 @@
-import { User, Mail, Phone, MapPin, FileText, Database, Printer } from 'lucide-react';
+import { Database, Printer, Receipt, Loader2 } from 'lucide-react';
 import { PrinterService } from '../utils/printer';
-
-interface Submission {
-  fullName: string;
-  email: string;
-  phone: string;
-  address: string;
-  notes: string;
-  timestamp: string;
-}
+import { PrinterManager } from '../services/printer/printerManager';
+import { PrinterStatus } from '../types/printer';
+import type { SubmissionData } from '../types/printer';
+import React, { useState, useEffect } from 'react';
 
 interface SubmissionDisplayProps {
-  submissions: Submission[];
+  submissions: SubmissionData[];
 }
 
 export const SubmissionDisplay: React.FC<SubmissionDisplayProps> = ({ submissions }) => {
+  const [status, setStatus] = useState<PrinterStatus>(PrinterManager.getInstance().getStatus());
+  const manager = PrinterManager.getInstance();
+
+  useEffect(() => {
+    return manager.subscribe((newStatus) => setStatus(newStatus));
+  }, [manager]);
+
+  const handleThermalPrint = async (data: SubmissionData) => {
+    try {
+      await manager.print(data);
+    } catch (err) {
+      // Error handled by status display in PrinterControls, but alert for immediate feedback
+      console.error('Print error:', err);
+    }
+  };
+
   if (submissions.length === 0) return null;
+
+  const isPrinting = status === PrinterStatus.Printing;
 
   return (
     <div className="submission-list">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <Database size={20} className="text-muted database-icon" />
-          <h2 style={{ fontSize: '1.25rem', color: 'var(--text-main)' }}>Local Submissions</h2>
+      <div className="list-header">
+        <div className="header-title">
+          <Database size={18} className="text-muted" />
+          <h2>Local History</h2>
         </div>
         <button 
           onClick={() => PrinterService.standardPrint()}
-          className="print-btn"
-          style={{ width: 'auto', marginTop: 0, padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+          className="browser-print-btn"
         >
-          <Printer size={16} />
-          Print Records
+          <Printer size={14} />
+          Standard PDF
         </button>
       </div>
       
-      {submissions.map((sub, index) => (
-        <div key={index} className="submission-card">
-          <div className="submission-grid">
-            <div className="submission-item">
-              <span className="item-label"><User size={12} style={{marginRight: '4px'}} /> Name</span>
-              <span className="item-value">{sub.fullName}</span>
+      {submissions.map((sub, index) => {
+        const ref = new Date(sub.timestamp).getTime().toString().slice(-6);
+        return (
+          <div key={index} className="pos-card">
+            <div className="card-top">
+              <div className="card-meta">
+                <span className="ref-badge">#{ref}</span>
+                <span className="time-stamp">{new Date(sub.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+              
+              <button 
+                onClick={() => handleThermalPrint(sub)}
+                disabled={status !== PrinterStatus.Ready && status !== PrinterStatus.Success}
+                className={`pos-print-btn ${isPrinting ? 'loading' : ''}`}
+              >
+                {isPrinting ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Receipt size={16} />
+                )}
+                Print Receipt
+              </button>
             </div>
-            <div className="submission-item">
-              <span className="item-label"><Mail size={12} style={{marginRight: '4px'}} /> Email</span>
-              <span className="item-value">{sub.email}</span>
-            </div>
-            <div className="submission-item">
-              <span className="item-label"><Phone size={12} style={{marginRight: '4px'}} /> Phone</span>
-              <span className="item-value">{sub.phone || 'N/A'}</span>
-            </div>
-            <div className="submission-item">
-              <span className="item-label"><MapPin size={12} style={{marginRight: '4px'}} /> Address</span>
-              <span className="item-value">{sub.address || 'N/A'}</span>
+
+            <div className="pos-content">
+              <div className="info-row">
+                <div className="info-cell">
+                  <label>Customer</label>
+                  <strong>{sub.fullName}</strong>
+                </div>
+                <div className="info-cell">
+                  <label>Contact</label>
+                  <span>{sub.email}</span>
+                </div>
+              </div>
+              
+              <div className="info-row secondary">
+                <div className="info-cell">
+                  <label>Phone</label>
+                  <span>{sub.phone || '---'}</span>
+                </div>
+                <div className="info-cell">
+                  <label>Address</label>
+                  <span>{sub.address || 'No address provided'}</span>
+                </div>
+              </div>
+
+              {sub.notes && (
+                <div className="info-notes">
+                  <label>Remarks</label>
+                  <p>{sub.notes}</p>
+                </div>
+              )}
             </div>
           </div>
-          <div className="submission-item" style={{ marginTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
-            <span className="item-label"><FileText size={12} style={{marginRight: '4px'}} /> Notes</span>
-            <span className="item-value">{sub.notes || 'No notes provided.'}</span>
-          </div>
-        </div>
-      )).reverse()}
+        );
+      }).reverse()}
     </div>
   );
 };

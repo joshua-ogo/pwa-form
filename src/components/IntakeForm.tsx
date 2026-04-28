@@ -53,8 +53,13 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit }) => {
         />
       </div>
 
-      <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-        <div className="form-group">
+      <div className="form-grid" style={{ 
+        display: 'grid', 
+        gridTemplateColumns: '1fr 1fr', 
+        gap: '1rem',
+        width: '100%' 
+      }}>
+        <div className="form-group" style={{ minWidth: 0 }}>
           <label>Email</label>
           <input
             type="email"
@@ -62,15 +67,17 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({ onSubmit }) => {
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             placeholder="john@example.com"
             required
+            style={{ width: '100%' }}
           />
         </div>
-        <div className="form-group">
+        <div className="form-group" style={{ minWidth: 0 }}>
           <label>Phone Number</label>
           <input
             type="tel"
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             placeholder="+1 234 567 890"
+            style={{ width: '100%' }}
           />
         </div>
       </div>

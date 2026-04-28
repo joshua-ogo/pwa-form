@@ -2,18 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { NetworkStatus } from './components/NetworkStatus';
 import { IntakeForm } from './components/IntakeForm';
 import { SubmissionDisplay } from './components/SubmissionDisplay';
-
-interface Submission {
-  fullName: string;
-  email: string;
-  phone: string;
-  address: string;
-  notes: string;
-  timestamp: string;
-}
+import { PrinterControls } from './components/PrinterControls';
+import type { SubmissionData } from './types/printer';
 
 const App: React.FC = () => {
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [submissions, setSubmissions] = useState<SubmissionData[]>([]);
 
   // Load submissions from localStorage on mount
   useEffect(() => {
@@ -27,8 +20,8 @@ const App: React.FC = () => {
     }
   }, []);
 
-  const handleFormSubmit = (data: Omit<Submission, 'timestamp'>) => {
-    const newSubmission: Submission = {
+  const handleFormSubmit = (data: Omit<SubmissionData, 'timestamp'>) => {
+    const newSubmission: SubmissionData = {
       ...data,
       timestamp: new Date().toISOString(),
     };
@@ -42,15 +35,18 @@ const App: React.FC = () => {
     <div className="container">
       <NetworkStatus />
       
+      <PrinterControls />
+      
       <IntakeForm onSubmit={handleFormSubmit} />
       
       <SubmissionDisplay submissions={submissions} />
       
       <footer style={{ marginTop: '4rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-        <p>© 2026 Midnight Intake PWA • Works Offline</p>
+        <p>© 2026 Intake PWA • Works Offline</p>
       </footer>
     </div>
   );
 };
 
 export default App;
+  
