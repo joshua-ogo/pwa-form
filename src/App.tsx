@@ -1,52 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import { NetworkStatus } from './components/NetworkStatus';
-import { IntakeForm } from './components/IntakeForm';
-import { SubmissionDisplay } from './components/SubmissionDisplay';
-import { PrinterControls } from './components/PrinterControls';
-import type { SubmissionData } from './types/printer';
+import './App.css'
+import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
+import AboutPage from './pages/AboutPage'
+import CacheStatusPage from './pages/CacheStatusPage'
+import IntakePage from './pages/IntakePage'
 
-const App: React.FC = () => {
-  const [submissions, setSubmissions] = useState<SubmissionData[]>([]);
-
-  // Load submissions from localStorage on mount
-  useEffect(() => {
-    const savedData = localStorage.getItem('midnight_submissions');
-    if (savedData) {
-      try {
-        setSubmissions(JSON.parse(savedData));
-      } catch (e) {
-        console.error('Failed to parse submissions', e);
-      }
-    }
-  }, []);
-
-  const handleFormSubmit = (data: Omit<SubmissionData, 'timestamp'>) => {
-    const newSubmission: SubmissionData = {
-      ...data,
-      timestamp: new Date().toISOString(),
-    };
-
-    const updatedSubmissions = [...submissions, newSubmission];
-    setSubmissions(updatedSubmissions);
-    localStorage.setItem('midnight_submissions', JSON.stringify(updatedSubmissions));
-  };
-
+export default function App() {
   return (
-    <div className="container">
-      <NetworkStatus />
-      
-      <PrinterControls />
-      
-      <IntakeForm onSubmit={handleFormSubmit} />
-      
-      <SubmissionDisplay submissions={submissions} />
-      
-      <footer style={{ marginTop: '4rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-        <p>© 2026 Intake PWA • Works Offline</p>
-      </footer>
-    </div>
-  );
-};
+    <BrowserRouter>
+      <div className="page">
+        <nav className="nav">
+          <div className="brand">Intake</div>
+          <div className="navLinks">
+            <NavLink to="/" end className={({ isActive }) => (isActive ? 'navLink active' : 'navLink')}>
+              Home
+            </NavLink>
+            <NavLink to="/about" className={({ isActive }) => (isActive ? 'navLink active' : 'navLink')}>
+              About
+            </NavLink>
+            <NavLink to="/cache" className={({ isActive }) => (isActive ? 'navLink active' : 'navLink')}>
+              Cache Status
+            </NavLink>
+          </div>
+        </nav>
 
-export default App;
-  
+        <Routes>
+          <Route path="/" element={<IntakePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/cache" element={<CacheStatusPage />} />
+          <Route
+            path="*"
+            element={
+              <div className="card">
+                <h2>Not found</h2>
+                <p className="muted">That page doesn’t exist.</p>
+              </div>
+            }
+          />
+        </Routes>
+      </div>
+    </BrowserRouter>
+  )
+}
